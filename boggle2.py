@@ -1,7 +1,5 @@
-import re
 import string
 import random
-import itertools
 
 board = [['-', '-', '-', '-'], ['-', '-', '-', '-'],
          ['-', '-', '-', '-'], ['-', '-', '-', '-']]
@@ -33,6 +31,7 @@ dice = ['AAEEGN',
         'DEILRX']
 
 
+# Picking a random die for each board space and picking a random side to show.
 def shake():
     taken = []
     for row in board:
@@ -77,7 +76,7 @@ def check(guess):
 
     guess_copy = guess_list.copy()
 
-    def inner_check(old_i, i, nono_list=[]):
+    def inner_check(old_i, i, nono_list=[], current_index=0):
         global failure
 
         # If inner check has been called the right amount of times word is valid
@@ -97,8 +96,11 @@ def check(guess):
         next_indices = []
 
         # setting variables for current and next letter indices.
-        start_indices = [j for j, x in enumerate(
-            board_list) if x == guess_copy[i]]
+        if i == 0:
+            start_indices = [j for j, x in enumerate(
+                board_list) if x == guess_copy[i]]
+        else:
+            start_indices.append(current_index)
 
         next_indices = [j for j, x in enumerate(
             board_list) if x == guess_copy[i+1]]
@@ -109,7 +111,7 @@ def check(guess):
                     # Checks centre blocks and the next possible moves.
                     if start_i in [5, 6, 9, 10]:
                         if (next_i != start_i - 2 or next_i != start_i + 2) and next_i <= start_i + 5 and next_i >= start_i - 5:
-                            return(inner_check(start_i, i+1, nono_list))
+                            return(inner_check(start_i, i+1, nono_list, next_i))
                         else:
                             failure += 1
                     # Checks corner start tiles and next possible moves.
@@ -123,31 +125,31 @@ def check(guess):
                             x, y, z = 10, 10, 5
 
                         if next_i in [1 + x, 4 + y, 5 + z]:
-                            return(inner_check(start_i, i+1, nono_list))
+                            return(inner_check(start_i, i+1, nono_list, next_i))
                         else:
                             failure += 1
                     # Next 3 elif and 1 else will check sides and next possible moves
                     elif start_i == 1 or start_i == 2:
                         if next_i <= start_i + 5 and next_i >= start_i - 1 and (next_i != start_i or next_i != start_i + 2):
-                            return(inner_check(start_i, i+1, nono_list))
+                            return(inner_check(start_i, i+1, nono_list, next_i))
                         else:
                             failure += 1
 
                     elif start_i in [4, 8]:
                         if next_i in [start_i - 4, start_i - 3, start_i + 4, start_i + 1, start_i + 5]:
-                            return(inner_check(start_i, i+1, nono_list))
+                            return(inner_check(start_i, i+1, nono_list, next_i))
                         else:
                             failure += 1
 
                     elif start_i == 7 or start_i == 11:
                         if next_i in [start_i - 5, start_i - 3, start_i - 1, start_i + 3, start_i + 4]:
-                            return(inner_check(start_i, i+1, nono_list))
+                            return(inner_check(start_i, i+1, nono_list, next_i))
                         else:
                             failure += 1
 
                     else:
                         if next_i > start_i - 6 and next_i < start_i + 2 and (next_i != start_i or next_i != start_i-2):
-                            return(inner_check(start_i, i+1, nono_list))
+                            return(inner_check(start_i, i+1, nono_list, next_i))
                         else:
                             failure += 1
                 else:
